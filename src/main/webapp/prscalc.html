@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<!--
+    TEST PAGE
+-->
+<html>
+<head>
+    <title>PRS Calculation</title>
+    <script type="text/javascript" src="jquery-2.1.4.js"></script>
+</head>
+<body>
+    <h1>Calculation Results</h1>
+    <table id="users">
+        <tr>
+            <th>Key</th>
+            <th>Value</th>
+        </tr>
+    </table>
+    <script type="text/javascript">
+        $(document).ready(function(){
+            $.getJSON("/PrsCalculation/api/prscalc/test", function(data) {
+                $.each(data, function(key, val){
+                    $("#users").append("<tr><td>" + key + "</td>" + "<td>" + val + "</td></tr>")
+                })
+            })
+        })
+    </script>
+ddfjhtfndhBSDUSDGI
+</body>
+</html>
