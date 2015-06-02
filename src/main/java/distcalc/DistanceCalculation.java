@@ -2,17 +2,15 @@ package distcalc;
 
 import javax.json.Json;
 import javax.json.JsonArray;
-import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
 import javax.ws.rs.*;
-import javax.ws.rs.core.Response;
 
 @Path("/prscalc")
 public class DistanceCalculation {
      @GET
      @Path("/rmobile")
-     @Produces("text/plain;charset=UTF-8")
-     public Response getDistanceForMobileStation(
+     @Produces("application/json;charset=UTF-8")
+     public JsonObject getDistanceForMobileStation(
              @QueryParam("name") String lineName,
              @QueryParam("upmob") int uPMob,
              @QueryParam("upstat") int uPStat,
@@ -40,13 +38,17 @@ public class DistanceCalculation {
      ){
          LineType lt = new LineType(lineName, uPMob, uPStat, uMinMob, uMinStat, aPer, aPerTunnel, aN, aNTunnel, aV, Ku, aon, atr);
          double rMobile = calcRmob(lt, load, speed, dist, lineQuantity, tunnel, feederLength, anker, crossQuantity, crossType, transfQuantity, loco);
-         return Response.status(200).entity(rMobile).build();
+         JsonObject mobileReport = Json.createObjectBuilder()
+                 .add("description", "Дальность для мобильной станции: ")
+                 .add("value", rMobile)
+                 .build();
+         return mobileReport;
      }
 
      @GET
      @Path("/rstationary")
-     @Produces("text/plain;charset=UTF-8")
-     public Response getDistanceForStationaryStation(
+     @Produces("application/json;charset=UTF-8")
+     public JsonObject getDistanceForStationaryStation(
              @QueryParam("name") String lineName,
              @QueryParam("upmob") int uPMob,
              @QueryParam("upstat") int uPStat,
@@ -73,12 +75,16 @@ public class DistanceCalculation {
      ){
          LineType lt = new LineType(lineName, uPMob, uPStat, uMinMob, uMinStat, aPer, aPerTunnel, aN, aNTunnel, aV, Ku, aon, atr);
          double rStationary = calcRstat(lt, load, dist, lineQuantity, tunnel, feederLength, anker, crossQuantity, crossType, transfQuantity, loco);
-         return Response.status(200).entity(rStationary).build();
+         JsonObject stationaryReport = Json.createObjectBuilder()
+                 .add("description", "Дальность для стационарной станции: ")
+                 .add("value", rStationary)
+                 .build();
+         return stationaryReport;
      }
     @GET
     @Path("/intermediate")
-    @Produces("text/plain;charset=UTF-8")
-    public Response getIntermediateCalculationResults(
+    @Produces("application/json;charset=UTF-8")
+    public JsonArray getIntermediateCalculationResults(
             @QueryParam("name") String lineName,
             @QueryParam("upmob") int uPMob,
             @QueryParam("upstat") int uPStat,
@@ -113,34 +119,123 @@ public class DistanceCalculation {
         double alin = calcAlin(lt, crossQuantity, crossType, transfQuantity);
         double alok = calcAlok(loco);
         double an = calcAn(lt, tunnel);
-        return Response.status(200).entity(
-                "Расчет дальности эффективной связи для линий: " + lineName +
-                "<br><br>Исходные данные:" +
-                "<br>Up моб. = " + uPMob + "\tUp стат. = " + uPStat +
-                "<br>A пер. (A пер. в тоннеле) = " + aPer + "(" + aPerTunnel + ")" +
-                "<br>An (An в тоннеле) = " + an + "(" + aNTunnel + ")" +
-                "<br>Av = " + aV +
-                "<br>Ku = " + Ku +
-                "<br>Aon = " + aon +
-                "<br>Atr = " + atr +
-                "<br>Тоннель = " + tunnel +
-                "<br>Скорость = " + speed +
-                "<br>Расстояние между проводами линии = " + dist +
-                "<br>Число нагрузок на линию = " + load +
-                "<br>Число путей = " + lineQuantity +
-                "<br>Длина фидера = " + feederLength +
-                "<br>Возбуждение линии в месте анкеровки = " + anker +
-                "<br>Тип перехода = " + crossType + "\tЧисло переходов = " + crossQuantity +
-                "<br>Число трансформаторов = " + transfQuantity +
-                "<br>Использование электровоза/тепловоза = " + loco +
-                "<br><br>Результаты расчета:" +
-                "<br>A прд. = " + Aprd +
-                "<br>Umin моб. = " + uMinMobile + "\tUmin стат. = " + uMinStation +
-                "<br>A пер. = " + Aper +
-                "<br>A ст. = " + ast +
-                "<br>A лин. = " + alin +
-                "<br>A лок. = " + alok +
-                "<br>An = " + an).build();
+        JsonArray intermediateReport = Json.createArrayBuilder()
+                .add(Json.createObjectBuilder()
+                        .add("description", "Расчет дальности эффективной связи для линий: ")
+                        .add("value", lineName)
+                )
+                .add(Json.createObjectBuilder()
+                        .add("description", "Исходные данные:")
+                )
+                .add(Json.createObjectBuilder()
+                        .add("description", "Up моб. = ")
+                        .add("value", uPMob)
+                )
+                .add(Json.createObjectBuilder()
+                        .add("description", "Up стат. = ")
+                        .add("value", uPStat)
+                )
+                .add(Json.createObjectBuilder()
+                        .add("description", "А пер. = ")
+                        .add("value", Aper)
+                )
+                .add(Json.createObjectBuilder()
+                        .add("description", "А пер.(тоннель) = ")
+                        .add("value", aPerTunnel)
+                )
+                .add(Json.createObjectBuilder()
+                        .add("description", "An = ")
+                        .add("value", aN)
+                )
+                .add(Json.createObjectBuilder()
+                        .add("description", "An(тоннель) = ")
+                        .add("value", aNTunnel)
+                )
+                .add(Json.createObjectBuilder()
+                        .add("description", "Av = ")
+                        .add("value", aV)
+                )
+                .add(Json.createObjectBuilder()
+                        .add("description", "Ku = ")
+                        .add("value", Ku)
+                )
+                .add(Json.createObjectBuilder()
+                        .add("description", "Aon = ")
+                        .add("value", aon)
+                )
+                .add(Json.createObjectBuilder()
+                        .add("description", "Тоннель = ")
+                        .add("value", tunnel)
+                )
+                .add(Json.createObjectBuilder()
+                        .add("description", "Скорость = ")
+                        .add("value", speed)
+                )
+                .add(Json.createObjectBuilder()
+                        .add("description", "Расстояние между проводами линии = ")
+                        .add("value", dist)
+                )
+                .add(Json.createObjectBuilder()
+                        .add("description", "Число нагрузок на линию = ")
+                        .add("value", load)
+                )
+                .add(Json.createObjectBuilder()
+                        .add("description", "Число путей = ")
+                        .add("value", lineQuantity)
+                )
+                .add(Json.createObjectBuilder()
+                        .add("description", "Длина фидера = ")
+                        .add("value", feederLength)
+                )
+                .add(Json.createObjectBuilder()
+                        .add("description", "Возбуждение линии в месте анкеровки = ")
+                        .add("value", anker)
+                )
+                .add(Json.createObjectBuilder()
+                        .add("description", "Тип перехода = ")
+                        .add("value", crossType)
+                )
+                .add(Json.createObjectBuilder()
+                        .add("description", "Число переходов = ")
+                        .add("value", crossQuantity)
+                )
+                .add(Json.createObjectBuilder()
+                        .add("description", "Число трансформаторов = ")
+                        .add("value", transfQuantity)
+                )
+                .add(Json.createObjectBuilder()
+                        .add("description", "Использование электровоза/тепловоза = ")
+                        .add("value", loco)
+                )
+                .add(Json.createObjectBuilder()
+                        .add("description", "Результаты расчета:")
+                )
+                .add(Json.createObjectBuilder()
+                        .add("description", "А прд. = ")
+                        .add("value", Aprd)
+                )
+                .add(Json.createObjectBuilder()
+                        .add("description", "Umin моб. = ")
+                        .add("value", uMinMobile)
+                )
+                .add(Json.createObjectBuilder()
+                        .add("description", "Umin стат. = ")
+                        .add("value", uMinStation)
+                )
+                .add(Json.createObjectBuilder()
+                        .add("description", "А ст. = ")
+                        .add("value", ast)
+                )
+                .add(Json.createObjectBuilder()
+                        .add("description", "А лин. = ")
+                        .add("value", alin)
+                )
+                .add(Json.createObjectBuilder()
+                        .add("description", "А лок. = ")
+                        .add("value", alok)
+                )
+                .build();
+        return intermediateReport;
     }
     /*
     Расчет дальности связи r для возимой станции.
